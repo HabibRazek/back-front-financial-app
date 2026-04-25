@@ -1,0 +1,38 @@
+groups:
+  - name: financial-app-alerts
+    rules:
+      - alert: BackendDown
+        expr: up{job="financial-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Financial backend is down"
+          description: "The backend service has been unreachable for more than 1 minute."
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="financial-backend"} > 400000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on backend"
+          description: "Backend memory usage exceeded 400MB for 5 minutes."
+
+      - alert: HighHttpErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "More than 5% of requests are returning 5xx errors."
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow API response time"
+          description: "95th percentile response time > 2s for 5 minutes."

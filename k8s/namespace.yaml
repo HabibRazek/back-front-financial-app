@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: financial-app
+  labels:
+    app: financial-app
+---
+# Create this secret manually — NEVER commit real values to Git:
+# kubectl create secret generic financial-secrets \
+#   --namespace=financial-app \
+#   --from-literal=database-url="postgresql://..." \
+#   --from-literal=jwt-secret="your-strong-secret"
+apiVersion: v1
+kind: Secret
+metadata:
+  name: financial-secrets
+  namespace: financial-app
+type: Opaque
+stringData:
+  database-url: "REPLACE_WITH_REAL_VALUE"
+  jwt-secret: "REPLACE_WITH_REAL_VALUE"
