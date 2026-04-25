@@ -3,10 +3,8 @@ kind: Deployment
 metadata:
   name: financial-frontend
   namespace: financial-app
-  labels:
-    app: financial-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: financial-frontend
@@ -17,7 +15,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/YOUR_GITHUB_USERNAME/back-front-financial-app/frontend:latest
+          image: financial-frontend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3000
           env:
@@ -25,25 +24,6 @@ spec:
               value: production
             - name: NEXT_PUBLIC_API_URL
               value: "http://financial-backend-service:3001/api"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 3000
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 20
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
@@ -54,7 +34,6 @@ spec:
   selector:
     app: financial-frontend
   ports:
-    - protocol: TCP
-      port: 3000
+    - port: 3000
       targetPort: 3000
   type: NodePort

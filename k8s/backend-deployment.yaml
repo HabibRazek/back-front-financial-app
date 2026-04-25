@@ -3,10 +3,8 @@ kind: Deployment
 metadata:
   name: financial-backend
   namespace: financial-app
-  labels:
-    app: financial-backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: financial-backend
@@ -14,14 +12,11 @@ spec:
     metadata:
       labels:
         app: financial-backend
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3001"
-        prometheus.io/path: "/api/metrics"
     spec:
       containers:
         - name: backend
-          image: ghcr.io/YOUR_GITHUB_USERNAME/back-front-financial-app/backend:latest
+          image: financial-backend:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 3001
           env:
@@ -39,27 +34,6 @@ spec:
                 secretKeyRef:
                   name: financial-secrets
                   key: jwt-secret
-            - name: FRONTEND_URL
-              value: "http://financial-frontend-service:3000"
-          readinessProbe:
-            httpGet:
-              path: /api/metrics
-              port: 3001
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api/metrics
-              port: 3001
-            initialDelaySeconds: 30
-            periodSeconds: 20
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
 ---
 apiVersion: v1
 kind: Service
@@ -70,7 +44,6 @@ spec:
   selector:
     app: financial-backend
   ports:
-    - protocol: TCP
-      port: 3001
+    - port: 3001
       targetPort: 3001
   type: ClusterIP
